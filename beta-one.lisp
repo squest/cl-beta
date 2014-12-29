@@ -9,37 +9,40 @@
 
 (load-plugins)
 
-(defun homepage ()
+(defun homepage (lim)
   "The homepage"
-  (let ((lim 200))
-    (with-html-output-to-string (s)
-      (:html
-       (:head
-	(:title "Hello world"))
-       (:body
-	(:header)
-	(:center
-	 (let ((nama "John Paul isPrime"))
-	   (htm (:h1 (str (cstr "Hellow world from restas " nama))
-		     (:br)
-		     (:h3
-		      (str (cstr "As you can see, this is a test page "
-				 "for daemonized sbcl, restas, cl-who, and redis"))))))
-	 (:ul
-	  (mapcar
-	   #'(lambda (x)
-	       (let* ((res (read-from-string (red:get (cstr "prime" x))))
-		      (numstat (getf res 'statprime))
-		      (num (cstr "The number "
-				 (getf res 'number)
-				 " prime status "
-				 numstat)))
-		 (htm (:li (str num)))))
-	   (loop for i from 2 to lim collect i))))
-	(:footer))))))
+  (with-html-output-to-string (s)
+    (:html
+     (:head
+      (:title "Hello world"))
+     (:body
+      (:header)
+      (:center
+       (let ((nama "John Paul isPrime"))
+	 (htm (:h1 (str (cstr "Hellow world from restas " nama))
+		   (:br)
+		   (:h3
+		    (str (cstr "As you can see, this is a test page "
+			       "for daemonized sbcl, restas, cl-who, and redis"))))))
+       (:ul
+	(mapcar
+	 #'(lambda (x)
+	     (let* ((res (read-from-string (red:get (cstr "prime" x))))
+		    (numstat (getf res 'statprime))
+		    (num (cstr "The number "
+			       (getf res 'number)
+			       " prime status "
+			       numstat)))
+	       (htm (:li (str num)))))
+	 (loop for i from 2 to lim collect i))))
+      (:footer)))))
 
 (defroute (:get "/") (req res)
-  (send-response res :body (homepage)))
+  (send-response res :body (homepage 200)))
+
+(defroute (:get "/times/([0-9]+)") (req res args)
+  (let ((lim (read-from-string (car args))))
+    (send-response res :body (homepage lim))))
 
 (defun run (port)
   (progn (connect)
